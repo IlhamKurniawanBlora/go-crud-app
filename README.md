@@ -2,20 +2,19 @@
 
 ## Deskripsi
 
-[Deskripsi singkat proyek]
-
+belajar CRUD menggunakan Go lang
 ## Teknologi
 
 * Go (versi 1.19)
 * Gin framework
 * GORM
-* PostgreSQL
+* mysql
 
 ## Instalasi
 
 1. Clone repositori ini:
    ```bash
-   git clone [URL yang tidak valid dihapus]
+   git clone https://github.com/IlhamKurniawanBlora/go-crud-app
 Gunakan kode dengan hati-hati.
 
 Instal dependensi:
