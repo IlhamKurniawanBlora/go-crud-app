@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">CRUD App</h1>
+    <img src="../uploads/mee.jpg" alt="ppp">
+
+    <!-- Form Tambah Item -->
+    <form id="addItemForm" class="bg-white p-6 rounded shadow-md mb-6">
+      <h2 class="text-xl font-bold mb-4">Tambah Item</h2>
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium text-gray-700">Nama</label>
+        <input type="text" id="name" class="mt-1 p-2 w-full border rounded-md" placeholder="Masukkan nama item" required />
+      </div>
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
+        <textarea id="description" class="mt-1 p-2 w-full border rounded-md" placeholder="Masukkan deskripsi" required></textarea>
+      </div>
+      <div class="mb-4">
+        <label for="price" class="block text-sm font-medium text-gray-700">Harga</label>
+        <input type="number" id="price" class="mt-1 p-2 w-full border rounded-md" placeholder="Masukkan harga" required />
+      </div>
+      <div class="mb-4">
+        <label for="image" class="block text-sm font-medium text-gray-700">Gambar</label>
+        <input type="file" id="image" accept="image/*" required />
+      </div>
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Tambah</button>
+    </form>
+
+    <!-- Daftar Item -->
+    <div class="bg-white p-6 rounded shadow-md">
+      <h2 class="text-xl font-bold mb-4">Daftar Item</h2>
+      <table class="table-auto w-full border-collapse border border-gray-300">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border px-4 py-2">Gambar</th>
+            <th class="border px-4 py-2">Nama</th>
+            <th class="border px-4 py-2">Deskripsi</th>
+            <th class="border px-4 py-2">Harga</th>
+            <th class="border px-4 py-2">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="itemList">
+          <!-- Item akan ditambahkan di sini -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:8080/api/items"; // URL backend
+
+    // Fungsi untuk mendapatkan data dari API dan menampilkan di tabel
+    async function fetchItems() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data dari server");
+        }
+        const items = await response.json();
+
+        const container = document.getElementById("itemList");
+        container.innerHTML = "";
+
+        items.forEach((item) => {
+          container.innerHTML += `
+            <tr>
+              <td class="border px-4 py-2 text-center">
+                <img src="..${item.image}" alt="${item.name}" class="h-16 mx-auto" />
+              </td>
+              <td class="border px-4 py-2">${item.name}</td>
+              <td class="border px-4 py-2">${item.description}</td>
+              <td class="border px-4 py-2">Rp ${item.price.toLocaleString()}</td>
+              <td class="border px-4 py-2 text-center">
+                <button onclick="deleteItem(${item.ID})" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                  Hapus
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      } catch (err) {
+        console.error("Error saat memuat data:", err);
+        alert("Gagal memuat data!");
+      }
+    }
+
+    // Event listener untuk form tambah item
+    document.getElementById("addItemForm").addEventListener("submit", async function (event) {
+      event.preventDefault(); // Mencegah reload halaman
+
+      const formData = new FormData();
+      formData.append("name", document.getElementById("name").value);
+      formData.append("description", document.getElementById("description").value);
+      formData.append("price", document.getElementById("price").value);
+      formData.append("image", document.getElementById("image").files[0]);
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          alert("Item berhasil ditambahkan!");
+          fetchItems(); // Memuat ulang daftar item
+        } else {
+          const error = await response.json();
+          alert("Gagal menambahkan item: " + error.error);
+        }
+      } catch (err) {
+        console.error("Error saat menambahkan item:", err);
+        alert("Terjadi error saat menambahkan item!");
+      }
+    });
+
+    // Fungsi untuk menghapus item
+    async function deleteItem(id) {
+      try {
+        const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        if (response.ok) {
+          alert("Item berhasil dihapus!");
+          fetchItems(); // Memuat ulang daftar item
+        } else {
+          alert("Gagal menghapus item!");
+        }
+      } catch (err) {
+        console.error("Error saat menghapus item:", err);
+        alert("Terjadi error saat menghapus item!");
+      }
+    }
+
+    // Fetch item saat halaman dimuat
+    fetchItems();
+  </script>
+</body>
+</html>
